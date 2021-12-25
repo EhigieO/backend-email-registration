@@ -3,9 +3,14 @@ package com.backendEmail.demo.registration;
 import com.backendEmail.demo.appUser.AppUser;
 import com.backendEmail.demo.appUser.AppUserRole;
 import com.backendEmail.demo.appUser.AppUserService;
+import com.backendEmail.demo.email.EmailSender;
+import com.backendEmail.demo.registration.token.ConfirmationToken;
 import com.backendEmail.demo.registration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
@@ -22,12 +27,15 @@ public class RegistrationService {
             throw new IllegalStateException("email not valid");
         }
 
-        return appUserService.signUpUser(new AppUser(
-                request.getFirstName(),
-                request.getLastName(),
-                request.getEmail(),
-                request.getPassword(),
-                AppUserRole.USER));
+        String token = appUserService.signUpUser(
+                new AppUser(
+                        request.getFirstName(),
+                        request.getLastName(),
+                        request.getEmail(),
+                        request.getPassword(),
+                        AppUserRole.USER
+                )
+        );
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
         emailSender.send(
                 request.getEmail(),
